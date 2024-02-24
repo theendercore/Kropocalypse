@@ -4,25 +4,23 @@ import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.context.CommandContext
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
-import net.minecraft.command.CommandBuildContext
-import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.CommandManager.argument
 import net.minecraft.server.command.CommandManager.literal
 import net.minecraft.server.command.ServerCommandSource
-import org.teamvoided.kropocalypse.util.Shapes
+import net.minecraft.server.world.ServerWorld
+import net.minecraft.text.Text
+import net.minecraft.util.math.BlockPos
+import org.teamvoided.kropocalypse.Kropocalypse.log
 import org.teamvoided.kropocalypse.commands.args.ShapeArgumentType
 import org.teamvoided.kropocalypse.commands.args.ShapeArgumentType.shapeArg
+import org.teamvoided.kropocalypse.util.CoordinateCallback
+import org.teamvoided.kropocalypse.util.Shapes
 
 object KropoCommands {
     fun init() {
-        CommandRegistrationCallback.EVENT.register(::register)
-    }
-
-    private fun register(
-        dispatcher: CommandDispatcher<ServerCommandSource>,
-        context: CommandBuildContext, env: CommandManager.RegistrationEnvironment
-    ) {
-        shapeCommand(dispatcher)
+        CommandRegistrationCallback.EVENT.register { dispatcher, _/*c*/, _/*env*/ ->
+            shapeCommand(dispatcher)
+        }
     }
 
 
@@ -46,24 +44,33 @@ object KropoCommands {
 
         val shape = ShapeArgumentType.getShape(c, "shape")
         val size = IntegerArgumentType.getInteger(c, "size")
+        var blocks = 0
 
-
-        when (shape) {
-            ShapeArgumentType.Shape.SQUARE -> Shapes.testCube(pos, world, size)
-            ShapeArgumentType.Shape.SQUARE_HOLLOW -> Shapes.testCubeHollow(pos, world, size)
-            ShapeArgumentType.Shape.CUBOID -> Shapes.testCuboid(pos, world, size)
-            ShapeArgumentType.Shape.CUBOID_HOLLOW -> Shapes.testCuboidHollow(pos, world, size)
-            ShapeArgumentType.Shape.SPHERE -> Shapes.testSphere(pos, world, size)
-            ShapeArgumentType.Shape.SPHERE_HOLLOW -> println("Ohio")
-            ShapeArgumentType.Shape.CYLINDER -> println("Ohio")
-            ShapeArgumentType.Shape.CYLINDER_HOLLOW -> println("Ohio")
-            ShapeArgumentType.Shape.PYRAMID -> println("Ohio")
-            ShapeArgumentType.Shape.PYRAMID_HOLLOW -> println("Ohio")
-            ShapeArgumentType.Shape.PRISM -> println("Ohio")
-            ShapeArgumentType.Shape.PRISM_HOLLOW -> println("Ohio")
-        }
-
+        theList[shape]?.let { it(pos, world, size) { blocks++ } }
+        val str = "Placed $blocks blocks!"
+        player.sendSystemMessage(Text.of(str), true)
+        log.info(str)
         return 1
     }
 
+    private val theList = mapOf(
+        Pair(ShapeArgumentType.Shape.CUBE, Shapes::testCube),
+        Pair(ShapeArgumentType.Shape.CUBE_HOLLOW, Shapes::testCubeHollow),
+        Pair(ShapeArgumentType.Shape.CUBOID, Shapes::testCuboid),
+        Pair(ShapeArgumentType.Shape.CUBOID_HOLLOW, Shapes::testCuboidHollow),
+
+        Pair(ShapeArgumentType.Shape.SPHERE, Shapes::testSphere),
+        Pair(ShapeArgumentType.Shape.SPHERE_HOLLOW, Shapes::testSphereHollow),
+        Pair(ShapeArgumentType.Shape.CYLINDER, Shapes::testCylinder),
+        Pair(ShapeArgumentType.Shape.CYLINDER_HOLLOW, Shapes::testCylinderHollow),
+
+        Pair(ShapeArgumentType.Shape.PYRAMID, ::notDone),
+        Pair(ShapeArgumentType.Shape.PYRAMID_HOLLOW, ::notDone),
+        Pair(ShapeArgumentType.Shape.PRISM, ::notDone),
+        Pair(ShapeArgumentType.Shape.PRISM_HOLLOW, ::notDone)
+
+    )
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun notDone(a: BlockPos, b: ServerWorld, c: Int, d: CoordinateCallback) = println("Not Finished")
 }

@@ -38,7 +38,7 @@ object ShapeArgumentType {
         DynamicCommandExceptionType { Text.translatable("Shape %s not found!", it) }
 
     enum class Shape {
-        SQUARE, SQUARE_HOLLOW,
+        CUBE, CUBE_HOLLOW,
         CUBOID, CUBOID_HOLLOW,
         SPHERE, SPHERE_HOLLOW,
         CYLINDER, CYLINDER_HOLLOW,
