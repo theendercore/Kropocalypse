@@ -1,9 +1,12 @@
 package org.teamvoided.kropocalypse.util
 
+import kotlinx.datetime.Clock
+import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
 import net.minecraft.util.math.Vec3i
-import org.joml.Vector3f
 import kotlin.math.pow
+import kotlin.random.Random
+
 
 fun Vec3i(size: Int) = Vec3i(size, size, size)
 fun Int.pow(i: Int) = this.toFloat().pow(i)
@@ -77,6 +80,8 @@ val blockList = listOf(
     Blocks.CALCITE,
 )
 
+fun block(): BlockState = blockList.random(Random(Clock.System.now().nanosecondsOfSecond)).defaultState
+
 typealias CoordinateCallback = (point: Vec3i) -> Unit
 typealias CoordinatePredicate = (point: Vec3i) -> Boolean
-typealias CenteredCoordinatePredicate = (point: Vec3i, center: Vec3i, radius: Vector3f) -> Boolean
+typealias CenteredCoordinatePredicate = (point: Vec3i, center: Vec3i) -> Boolean
